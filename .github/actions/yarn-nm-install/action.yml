@@ -1,5 +1,12 @@
 name: yarn-nm-install
 description: Installs deps via yarn and re-uses the cache
+inputs:
+  playwright:
+    description:
+      Whether to also install (and cache) the browsers that playwright needs.
+      Only the jobs that actually launch a browser should set this to 'true'.
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
@@ -7,7 +14,7 @@ runs:
     # This will skip the install step if the cache is hit.
     - name: Restore node_modules
       id: yarn-node-modules-cache
-      uses: actions/cache@v3
+      uses: actions/cache@v6
       with:
         path: |
           **/node_modules
@@ -31,8 +38,9 @@ runs:
 
     # Thanks to https://github.com/rafaelbiten for this step https://github.com/microsoft/playwright/issues/7249#issuecomment-1385567519
     - name: Cache Playwright Browsers for Playwright's Version
+      if: inputs.playwright == 'true'
       id: cache-playwright-browsers
-      uses: actions/cache@v3
+      uses: actions/cache@v6
       with:
         path: ~/.cache/ms-playwright
         key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
@@ -44,12 +52,13 @@ runs:
       env:
         YARN_NM_MODE: 'hardlinks-local'
 
-    # This step is only needed if the job runs playwright tests. But we have
-    # to include it in all jobs. The reason is, both `yarn install` and `yarn run playwright install`
-    # modify the `~/.cache/ms-playwright` folder. If we don't include this step in all jobs,
-    # then the cache will change in some jobs and not in others, which would make the cache useless.
+    # Only the jobs that launch a browser (the e2e and the compatibility tests)
+    # ask for this step, so that a problem with playwright's browsers or their
+    # system dependencies can't break the build, lint, test and typecheck jobs.
     - name: Download playwright
-      if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+      if:
+        inputs.playwright == 'true' &&
+        steps.cache-playwright-browsers.outputs.cache-hit != 'true'
       shell: bash
       run: yarn workspace playground run playwright install --with-deps
 

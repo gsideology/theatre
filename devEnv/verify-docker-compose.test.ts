@@ -18,9 +18,10 @@ describe(`Docker-compose`, () => {
     const allFoldersToExclude = findAllNodejsFoldersAt(
       path.join(__dirname, '..'),
     ).map((fullPath) => {
-      return path.join(
+      // paths in docker-compose.yml are posix, whatever the host OS is
+      return path.posix.join(
         '/app',
-        path.relative(path.join(__dirname, '..'), fullPath),
+        ...path.relative(path.join(__dirname, '..'), fullPath).split(path.sep),
       )
     })
 
