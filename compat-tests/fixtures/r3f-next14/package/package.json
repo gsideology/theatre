@@ -13,8 +13,15 @@
     "@theatre/r3f": "0.0.1-COMPAT.1",
     "@theatre/studio": "0.0.1-COMPAT.1",
     "theatric": "0.0.1-COMPAT.1",
-    "next": "latest",
+    "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.5",
+    "@types/react": "^18.2.17",
+    "@types/react-dom": "^18.2.7",
+    "@types/three": "^0.155.0",
+    "typescript": "^5.1.6"
   }
 }

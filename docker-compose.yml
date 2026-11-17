@@ -14,9 +14,9 @@ services:
       - /app/node_modules
       - /app/compat-tests/fixtures/basic-react17/package/node_modules
       - /app/compat-tests/fixtures/r3f-cra/package/node_modules
-      - /app/compat-tests/fixtures/r3f-next-latest/package/.next/node_modules
-      - /app/compat-tests/fixtures/r3f-next-latest/package/.next/types/node_modules
-      - /app/compat-tests/fixtures/r3f-next-latest/package/node_modules
+      - /app/compat-tests/fixtures/r3f-next14/package/.next/node_modules
+      - /app/compat-tests/fixtures/r3f-next14/package/.next/types/node_modules
+      - /app/compat-tests/fixtures/r3f-next14/package/node_modules
       - /app/compat-tests/fixtures/r3f-parcel1/package/node_modules
       - /app/compat-tests/fixtures/r3f-react18/package/node_modules
       - /app/compat-tests/fixtures/r3f-vite2/package/node_modules
