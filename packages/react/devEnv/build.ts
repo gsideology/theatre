@@ -8,6 +8,10 @@ const externalPlugin = (patterns: RegExp[]): Plugin => {
 
     setup(build) {
       build.onResolve({filter: /.*/}, (args) => {
+        // An absolute path is a file, never a package. Without this check, the
+        // entry point on Windows (`C:\...`) would match the pattern below.
+        if (path.isAbsolute(args.path)) return
+
         const external = patterns.some((p) => {
           return p.test(args.path)
         })

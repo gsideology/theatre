@@ -102,7 +102,7 @@ export const Scene: React.FC<{project: IProject}> = ({project}) => {
         ),
       )
     })
-  })
+  }, [])
 
   return (
     <div

@@ -65,7 +65,7 @@ Read more at
 ### Hacking with `examples/`
 
 Other than `playground`, the [`examples/`](./examples) folder contains a few
-small projects that use Theatre.js with [parcel](https://parceljs.org),
+small projects that use Theatre.js with [vite](https://vitejs.dev),
 [Create react app](create-react-app.dev), and other build tools. This means that
 unlike `playground`, you have to build all the packages before running the
 examples.

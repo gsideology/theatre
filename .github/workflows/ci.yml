@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 0.7.x]
   pull_request:
-    branches: [main]
+    branches: [main, 0.7.x]
 
 jobs:
   Build:
@@ -12,12 +12,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - uses: ./.github/actions/yarn-nm-install
@@ -28,12 +28,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - uses: ./.github/actions/yarn-nm-install
@@ -47,12 +47,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - uses: ./.github/actions/yarn-nm-install
@@ -63,12 +63,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - uses: ./.github/actions/yarn-nm-install
@@ -76,37 +76,45 @@ jobs:
       - run: yarn typecheck
   VisualRegression:
     name: Visual regression tests
-    runs-on: ubuntu-latest
+    # Pinned to ubuntu 22.04 for as long as we're on playwright 1.36, which
+    # predates ubuntu 24.04 and can't install its system dependencies there.
+    # The linux screenshots in the repo were also taken with this setup.
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - uses: ./.github/actions/yarn-nm-install
+        with:
+          playwright: 'true'
 
       - name: Run e2e tests
         run: yarn test:e2e:ci
 
   Compatibility-Tests:
-    runs-on: ubuntu-latest
+    # Pinned to ubuntu 22.04 for the same reason as the visual regression tests.
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - uses: ./.github/actions/yarn-nm-install
+        with:
+          playwright: 'true'
       # re-enable the following line if we start to get EINTEGRITY errors again
       # - run: npm cache clean || npm cache verify
       # This will test whether `npm install`/`yarn install` can actually run on each compatibility test fixture. See `compat-tests/README.md` for more info.

@@ -28,7 +28,9 @@ const config = ['studio', 'core'].map((which) => {
         return false
       }
 
-      if (s.startsWith('/') || s.startsWith('./') || s.startsWith('../')) {
+      // `path.isAbsolute()` rather than `startsWith('/')`, so that absolute
+      // paths on Windows (`C:\...`) aren't mistaken for external packages.
+      if (path.isAbsolute(s) || s.startsWith('./') || s.startsWith('../')) {
         return false
       }
 

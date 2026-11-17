@@ -79,9 +79,15 @@ export async function installFixtures(): Promise<void> {
   await releaseToVerdaccio()
 
   console.log('Running `$ npm install` on test packages')
-  await runNpmInstallOnTestPackages()
+  const fixturesThatFailedToInstall = await runNpmInstallOnTestPackages()
 
   restoreTestPackageJsons()
+
+  if (fixturesThatFailedToInstall.length > 0) {
+    // Without a non-zero exit code, CI would carry on to the tests, and the
+    // failure would only show up there, as a confusing "command not found".
+    process.exitCode = 1
+  }
 
   if (keepAlive) {
     console.log('Keeping verdaccio alive. Press Ctrl+C to exit.')
@@ -91,10 +97,19 @@ export async function installFixtures(): Promise<void> {
     console.log('Closing verdaccio. Use --keep-alive to keep it running.')
     await verdaccioServer.close()
   }
-  console.log('Done')
+  console.log(
+    fixturesThatFailedToInstall.length > 0
+      ? `Done, but ${fixturesThatFailedToInstall.length} of the fixtures failed to install (see above).`
+      : 'Done',
+  )
 }
 
-async function runNpmInstallOnTestPackages() {
+/**
+ * Runs `npm install` on all the fixtures.
+ *
+ * @returns The paths to the fixtures whose dependencies failed to install
+ */
+async function runNpmInstallOnTestPackages(): Promise<Array<string>> {
   const packagePaths = await getCompatibilityTestSetups()
 
   const promises = packagePaths.map(async (pathToPackageDir) => {
@@ -136,20 +151,14 @@ Original error: ${error}`)
   })
 
   const result = await Promise.allSettled(promises)
-  const failed = result.filter((x) => x.status === 'rejected')
+  const failed = packagePaths.filter((_, i) => result[i].status === 'rejected')
   if (failed.length > 0) {
     console.error(
       `Failed to install dependencies for the following packages:`,
-      result
-        .map((result, i) => [packagePaths[i], result])
-        .filter(
-          ([p, result]) =>
-            // @ts-ignore
-            result.status === 'rejected',
-        )
-        .map(([path]) => path),
+      failed,
     )
   }
+  return failed
 }
 
 /**
@@ -348,7 +357,8 @@ async function releaseToVerdaccio() {
 
   const workspacesListString = await $`yarn workspaces list --json`
   const workspacesListObjects = workspacesListString.stdout
-    .split(os.EOL)
+    // yarn separates the lines with `\n` on every OS, so we can't split by `os.EOL`
+    .split(/\r?\n/)
     // strip out empty lines
     .filter(Boolean)
     .map((x) => JSON.parse(x))
